@@ -1,5 +1,5 @@
 # docker-airsonic
-An Alpine Linux Docker container for Airsonic
+Stack:steve An Alpine Linux Docker container for Airsonic
 
 # IMPORTANT INFO
 
