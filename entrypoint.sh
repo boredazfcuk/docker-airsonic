@@ -40,23 +40,60 @@ Initialise(){
    fi
 }
 
+CheckOpenVPNPIA(){
+   if [ "${openvpnpia_enabled}" ]; then
+      echo "$(date '+%c') INFO:    OpenVPNPIA is enabled. Wait for VPN to connect"
+      vpn_adapter="$(ip addr | grep tun.$ | awk '{print $7}')"
+      while [ -z "${vpn_adapter}" ]; do
+         vpn_adapter="$(ip addr | grep tun.$ | awk '{print $7}')"
+         sleep 5
+      done
+      echo "$(date '+%c') INFO:    VPN adapter available: ${vpn_adapter}"
+   else
+      echo "$(date '+%c') INFO:    OpenVPNPIA is not enabled"
+   fi
+}
+
 CreateGroup(){
-   if [ -z "$(getent group "${group}" | cut -d: -f3)" ]; then
-      echo "$(date '+%c') INFO:    Group ID available, creating group"
-      addgroup -g "${group_id}" "${group}"
-   elif [ ! "$(getent group "${group}" | cut -d: -f3)" = "${group_id}" ]; then
-      echo "$(date '+%c') ERROR:   Group group_id mismatch - exiting"
-      exit 1
+   if [ "$(grep -c "^${group}:x:${group_id}:" "/etc/group")" -eq 1 ]; then
+      echo "$(date '+%c') INFO:    Group, ${group}:${group_id}, already created"
+   else
+      if [ "$(grep -c "^${group}:" "/etc/group")" -eq 1 ]; then
+         echo "$(date '+%c') ERROR:   Group name, ${group}, already in use - exiting"
+         sleep 120
+         exit 1
+      elif [ "$(grep -c ":x:${group_id}:" "/etc/group")" -eq 1 ]; then
+         if [ "${force_gid}" = "True" ]; then
+            group="$(grep ":x:${group_id}:" /etc/group | awk -F: '{print $1}')"
+            echo "$(date '+%c') WARNING: Group id, ${group_id}, already exists - continuing as force_gid variable has been set. Group name to use: ${group}"
+         else
+            echo "$(date '+%c') ERROR:   Group id, ${group_id}, already in use - exiting"
+            sleep 120
+            exit 1
+         fi
+      else
+         echo "$(date '+%c') INFO:    Creating group ${group}:${group_id}"
+         addgroup -g "${group_id}" "${group}"
+      fi
    fi
 }
 
 CreateUser(){
-   if [ -z "$(getent passwd "${stack_user}" | cut -d: -f3)" ]; then
-      echo "$(date '+%c') INFO:    User ID available, creating user"
-      adduser -s /bin/ash -H -D -G "${group}" -u "${user_id}" "${stack_user}"
-   elif [ ! "$(getent passwd "${stack_user}" | cut -d: -f3)" = "${user_id}" ]; then
-      echo "$(date '+%c') ERROR:   User ID already in use - exiting"
-      exit 1
+   if [ "$(grep -c "^${stack_user}:x:${user_id}:${group_id}" "/etc/passwd")" -eq 1 ]; then
+      echo "$(date '+%c') INFO     User, ${stack_user}:${user_id}, already created"
+   else
+      if [ "$(grep -c "^${stack_user}:" "/etc/passwd")" -eq 1 ]; then
+         echo "$(date '+%c') ERROR    User name, ${stack_user}, already in use - exiting"
+         sleep 120
+         exit 1
+      elif [ "$(grep -c ":x:${user_id}:$" "/etc/passwd")" -eq 1 ]; then
+         echo "$(date '+%c') ERROR    User id, ${user_id}, already in use - exiting"
+         sleep 120
+         exit 1
+      else
+         echo "$(date '+%c') INFO     Creating user ${stack_user}:${user_id}"
+         adduser -s /bin/ash -D -G "${group}" -u "${user_id}" "${stack_user}" -h "/home/${stack_user}"
+      fi
    fi
 }
 
@@ -107,6 +144,7 @@ LaunchAirsonic(){
 
 ##### Script #####
 Initialise
+CheckOpenVPNPIA
 CreateGroup
 CreateUser
 SetOwnerAndGroup
