@@ -11,7 +11,7 @@ echo "$(date '+%d/%m/%Y - %H:%M:%S') | Create directories" && \
    mkdir -p "${app_base_dir}" && \
 echo "$(date '+%d/%m/%Y - %H:%M:%S') | Install application dependencies" && \
    apk add --no-cache --no-progress ${app_dependencies} && \
-echo "$(date '+%d/%m/%Y - %H:%M:%S') | Install Airsonic" && \
+echo "$(date '+%d/%m/%Y - %H:%M:%S') | Download Airsonic" && \
    latest_version="$(curl -sX GET "https://api.github.com/repos/airsonic/airsonic/releases/latest" | awk '/tag_name/{print $4;exit}' FS='[""]')" && \
    wget -qO "${app_base_dir}/airsonic.war" "https://github.com/airsonic/airsonic/releases/download/${latest_version}/airsonic.war"
 
