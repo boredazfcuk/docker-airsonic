@@ -6,7 +6,7 @@ ARG app_dependencies="tzdata ca-certificates openjdk8-jre fontconfig openssl zip
 ENV config_dir="/config" \
    app_base_dir="/Airsonic"
 
-RUN echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD STARTED *****" && \
+RUN echo "$(date '+%d/%m/%Y - %H:%M:%S') | ***** BUILD STARTED FOR AIRSONIC ${airsonic_version} *****" && \
 echo "$(date '+%d/%m/%Y - %H:%M:%S') | Create directories" && \
    mkdir -p "${app_base_dir}" && \
 echo "$(date '+%d/%m/%Y - %H:%M:%S') | Install application dependencies" && \
