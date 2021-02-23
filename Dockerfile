@@ -1,4 +1,4 @@
-FROM alpine:3.12
+FROM alpine:3.13
 MAINTAINER boredazfcuk
 # airsonic_version not use. Just change the value to force a rebuild
 ARG airsonic_version="10.6.2"

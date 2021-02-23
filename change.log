@@ -1,3 +1,7 @@
+20210218
+
+ - Change: Rebase to Alpine Linux 3.13
+
 20200823
 
  - Change: Rewrote User and Group creation functions to allow use of force_gid to add user to prexisting group
